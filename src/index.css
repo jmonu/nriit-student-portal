@@ -1,3 +1,6 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -13,7 +16,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 221 83% 53%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -22,7 +25,7 @@
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 210 40% 96.1%;
+    --accent: 48 96% 53%;
     --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 84.2% 60.2%;
@@ -30,25 +33,9 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 221 83% 53%;
 
     --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
@@ -61,7 +48,7 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
     --secondary: 217.2 32.6% 17.5%;
@@ -70,23 +57,15 @@
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 48 96% 53%;
+    --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --ring: 224.3 76.3% 48%;
   }
 }
 
@@ -94,8 +73,102 @@
   * {
     @apply border-border;
   }
-
+  
+  html {
+    @apply scroll-smooth;
+  }
+  
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-montserrat;
+  }
+}
+
+@layer components {
+  .glitch-effect {
+    @apply relative inline-block hover:animate-glitch text-primary;
+  }
+  
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+  }
+  
+  .btn-primary {
+    @apply bg-primary text-white hover:bg-primary/90 px-4 py-2 rounded-md shadow-md transition-all duration-200;
+  }
+  
+  .btn-accent {
+    @apply bg-accent text-accent-foreground hover:bg-accent/90 px-4 py-2 rounded-md shadow-md transition-all duration-200;
+  }
+  
+  .news-ticker-container {
+    @apply relative overflow-hidden bg-primary text-white py-2 px-4;
+  }
+  
+  .news-ticker-content {
+    @apply whitespace-nowrap animate-news-ticker;
+  }
+
+  /* Image slider styles */
+  .slider {
+    @apply relative h-[60vh] overflow-hidden;
+  }
+  
+  .slider-item {
+    @apply absolute inset-0 opacity-0 transition-opacity duration-1000 ease-in-out;
+  }
+  
+  .slider-item.active {
+    @apply opacity-100;
+  }
+  
+  .slider-img {
+    @apply w-full h-full object-cover;
+  }
+  
+  /* Dashboard layout */
+  .dashboard-layout {
+    @apply grid grid-cols-1 md:grid-cols-[240px_1fr] min-h-screen;
+  }
+  
+  .dashboard-sidebar {
+    @apply bg-primary text-white p-4 flex flex-col h-screen sticky top-0;
+  }
+  
+  .dashboard-content {
+    @apply p-4 md:p-6;
+  }
+  
+  .dashboard-menu-item {
+    @apply flex items-center gap-2 p-2 rounded-md hover:bg-white/10 transition-colors;
+  }
+  
+  .dashboard-menu-item.active {
+    @apply bg-white/20;
+  }
+  
+  /* Table styles */
+  .data-table {
+    @apply w-full border-collapse;
+  }
+  
+  .data-table th {
+    @apply bg-gray-100 dark:bg-gray-800 p-2 text-left;
+  }
+  
+  .data-table td {
+    @apply border-t border-gray-200 dark:border-gray-700 p-2;
+  }
+  
+  .data-table tr:hover {
+    @apply bg-gray-50 dark:bg-gray-900/50;
+  }
+  
+  /* Back to top button */
+  .back-to-top {
+    @apply fixed bottom-6 right-6 bg-primary text-white p-2 rounded-full shadow-lg opacity-0 transition-opacity duration-300 hover:bg-primary/90 z-50;
+  }
+  
+  .back-to-top.visible {
+    @apply opacity-100;
   }
 }
