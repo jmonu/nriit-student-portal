@@ -120,29 +120,6 @@ const Login: React.FC = () => {
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Demo Accounts:
-            </p>
-            <div className="grid grid-cols-3 gap-2 mt-2 text-xs">
-              <div className="bg-gray-100 dark:bg-gray-700 p-2 rounded">
-                <p className="font-semibold">Admin</p>
-                <p>ADMIN001</p>
-                <p>admin123</p>
-              </div>
-              <div className="bg-gray-100 dark:bg-gray-700 p-2 rounded">
-                <p className="font-semibold">Teacher</p>
-                <p>T001</p>
-                <p>teacher123</p>
-              </div>
-              <div className="bg-gray-100 dark:bg-gray-700 p-2 rounded">
-                <p className="font-semibold">Student</p>
-                <p>S001</p>
-                <p>student123</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
               Forgot password? <a href="#" className="text-primary hover:underline">Click here</a> to reset.
             </p>
           </div>

@@ -17,12 +17,20 @@ import DashboardLayout from "./components/dashboard/DashboardLayout";
 import StudentDashboard from "./pages/student/StudentDashboard";
 import AttendancePage from "./pages/student/AttendancePage";
 
+// Teacher Pages
+import TeacherAttendancePage from "./pages/teacher/AttendancePage";
+
 // Admin Pages
 import UsersPage from "./pages/admin/UsersPage";
 import ClassesPage from "./pages/admin/ClassesPage";
 import ClassAssignmentPage from "./pages/admin/ClassAssignmentPage";
 import SlotsPage from "./pages/admin/SlotsPage";
 import SchedulesPage from "./pages/admin/SchedulesPage";
+import NoticesPage from "./pages/admin/NoticesPage";
+import EventsPage from "./pages/admin/EventsPage";
+import AlertsPage from "./pages/admin/AlertsPage";
+import FacultyPage from "./pages/admin/FacultyPage";
+import CalendarPage from "./pages/admin/CalendarPage";
 
 const queryClient = new QueryClient();
 
@@ -48,7 +56,7 @@ const App = () => (
               {/* Teacher Dashboard Routes */}
               <Route path="/teacher-dashboard" element={<DashboardLayout />}>
                 <Route index element={<div>Teacher Dashboard Home</div>} />
-                <Route path="attendance" element={<div>Teacher Attendance Page</div>} />
+                <Route path="attendance" element={<TeacherAttendancePage />} />
                 <Route path="notices" element={<div>Teacher Notices Page</div>} />
                 <Route path="events" element={<div>Teacher Events Page</div>} />
                 <Route path="alerts" element={<div>Teacher Alerts Page</div>} />
@@ -69,11 +77,11 @@ const App = () => (
                 <Route path="slots" element={<SlotsPage />} />
                 <Route path="schedules" element={<SchedulesPage />} />
                 <Route path="attendance" element={<div>Admin Attendance Page</div>} />
-                <Route path="notices" element={<div>Admin Notices Page</div>} />
-                <Route path="events" element={<div>Admin Events Page</div>} />
-                <Route path="alerts" element={<div>Admin Alerts Page</div>} />
-                <Route path="faculty" element={<div>Admin Faculty Page</div>} />
-                <Route path="calendar" element={<div>Admin Calendar Page</div>} />
+                <Route path="notices" element={<NoticesPage />} />
+                <Route path="events" element={<EventsPage />} />
+                <Route path="alerts" element={<AlertsPage />} />
+                <Route path="faculty" element={<FacultyPage />} />
+                <Route path="calendar" element={<CalendarPage />} />
                 <Route path="complaints" element={<div>Admin Complaints Page</div>} />
                 <Route path="settings" element={<div>Admin Settings Page</div>} />
                 <Route path="audit-log" element={<div>Admin Audit Log Page</div>} />

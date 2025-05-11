@@ -59,7 +59,7 @@ const SidebarNav: React.FC = () => {
           <NavItem to="/admin-dashboard/attendance" icon={<ClipboardList size={20} />} label="Attendance" />
           <NavItem to="/admin-dashboard/notices" icon={<FileText size={20} />} label="Notices" />
           <NavItem to="/admin-dashboard/events" icon={<Calendar size={20} />} label="Events" />
-          <NavItem to="/admin-dashboard/alerts" icon={<Bell size={20} />} label="Alerts" />
+          <NavItem to="/admin-dashboard/alerts" icon={<AlertTriangle size={20} />} label="Alerts" />
           <NavItem to="/admin-dashboard/faculty" icon={<User size={20} />} label="Faculty" />
           <NavItem to="/admin-dashboard/calendar" icon={<Calendar size={20} />} label="Calendar" />
           <NavItem to="/admin-dashboard/complaints" icon={<MessageSquare size={20} />} label="Complaints" />

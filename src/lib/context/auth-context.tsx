@@ -57,7 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(teacherUser);
         localStorage.setItem('nriit_user', JSON.stringify(teacherUser));
         return true;
-      } else if (roll_no === 'S001' && password === 'student123') {
+      } else if (roll_no === 'S001' && password === 'monmad') {
         const studentUser: User = {
           id: '3',
           roll_no: 'S001',
@@ -72,6 +72,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(studentUser);
         localStorage.setItem('nriit_user', JSON.stringify(studentUser));
         return true;
+      }
+      
+      // Check for dynamically created students with password "monmad"
+      const storedUsersJSON = localStorage.getItem('nriit_users');
+      if (storedUsersJSON) {
+        const storedUsers = JSON.parse(storedUsersJSON);
+        const matchedUser = storedUsers.find((u: User) => 
+          u.roll_no === roll_no && u.type === 'student'
+        );
+        
+        if (matchedUser && password === 'monmad') {
+          setUser(matchedUser);
+          localStorage.setItem('nriit_user', JSON.stringify(matchedUser));
+          return true;
+        }
       }
       
       return false;

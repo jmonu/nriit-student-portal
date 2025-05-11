@@ -1,303 +1,297 @@
 
 import React, { useState } from 'react';
-import { 
-  Table, 
-  TableHeader, 
-  TableBody, 
-  TableRow, 
-  TableHead, 
-  TableCell 
-} from '@/components/ui/table';
-import { 
-  Tabs, 
-  TabsList, 
-  TabsTrigger, 
-  TabsContent 
-} from '@/components/ui/tabs';
+import { useToast } from "@/hooks/use-toast";
+import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User } from '@/lib/types';
+import { Check, X, Plus } from 'lucide-react';
 
-// Mock user data - in a real app this would come from an API
-const mockUsers: User[] = [
-  {
-    id: '2',
-    roll_no: 'T001',
-    name: 'Teacher User',
-    email: 'teacher@nriit.edu',
-    phone: '9876543211',
-    type: 'teacher',
-  },
-  {
-    id: '3',
-    roll_no: 'S001',
-    name: 'Student User',
-    email: 'student@nriit.edu',
-    phone: '9876543212',
-    type: 'student',
-    branch: 'CSE',
-    year: 2,
-  },
-  {
-    id: '4',
-    roll_no: 'S002',
-    name: 'Another Student',
-    email: 'student2@nriit.edu',
-    phone: '9876543213',
-    type: 'student',
-    branch: 'ECE',
-    year: 1,
-  }
-];
+interface UserFormData {
+  roll_no: string;
+  name: string;
+  email: string;
+  phone: string;
+  type: 'student' | 'teacher' | 'admin';
+  branch?: 'CSE' | 'ECE' | 'EEE' | 'MECH' | 'CIVIL';
+  year?: 1 | 2 | 3 | 4;
+}
+
+const initialUserFormData: UserFormData = {
+  roll_no: '',
+  name: '',
+  email: '',
+  phone: '',
+  type: 'student',
+  branch: 'CSE',
+  year: 1
+};
 
 const UsersPage: React.FC = () => {
-  const [users, setUsers] = useState<User[]>(mockUsers);
-  const [newUser, setNewUser] = useState({
-    roll_no: '',
-    name: '',
-    email: '',
-    phone: '',
-    type: 'student',
-    branch: 'CSE',
-    year: 1
-  });
+  const { toast } = useToast();
+  const [users, setUsers] = useState<User[]>([
+    {
+      id: '1',
+      roll_no: 'ADMIN001',
+      name: 'Admin User',
+      email: 'admin@nriit.edu',
+      phone: '9876543210',
+      type: 'admin'
+    },
+    {
+      id: '2',
+      roll_no: 'T001',
+      name: 'Teacher User',
+      email: 'teacher@nriit.edu',
+      phone: '9876543211',
+      type: 'teacher'
+    },
+    {
+      id: '3',
+      roll_no: 'S001',
+      name: 'Student User',
+      email: 'student@nriit.edu',
+      phone: '9876543212',
+      type: 'student',
+      branch: 'CSE',
+      year: 2
+    }
+  ]);
 
-  // Filter users based on type
-  const students = users.filter(user => user.type === 'student');
-  const teachers = users.filter(user => user.type === 'teacher');
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setNewUser(prev => ({
-      ...prev,
-      [name]: name === 'year' ? parseInt(value) : value
-    }));
-  };
-
+  const [formData, setFormData] = useState<UserFormData>(initialUserFormData);
+  
   const handleCreateUser = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // In a real app, this would make an API call
-    const newUserWithId: User = {
-      id: `${Date.now()}`,
-      ...newUser,
-      year: newUser.type === 'student' ? newUser.year as 1 | 2 | 3 | 4 : undefined,
-      branch: newUser.type === 'student' ? newUser.branch as 'CSE' | 'ECE' | 'EEE' | 'MECH' | 'CIVIL' : undefined
+    // Generate a random ID
+    const newUser: User = {
+      id: Date.now().toString(),
+      ...formData
     };
-
-    setUsers(prev => [...prev, newUserWithId]);
     
-    // Reset form
-    setNewUser({
-      roll_no: '',
-      name: '',
-      email: '',
-      phone: '',
-      type: 'student',
-      branch: 'CSE',
-      year: 1
+    setUsers([...users, newUser]);
+    setFormData(initialUserFormData);
+    
+    // Log the user creation for demonstration
+    console.log('Created user:', newUser);
+    
+    toast({
+      title: "User Created",
+      description: `${formData.name} (${formData.roll_no}) has been created successfully.`
     });
-
-    console.log('Created user:', newUserWithId);
   };
-
+  
   const handleDeleteUser = (userId: string) => {
-    // In a real app, this would make an API call
+    const userToDelete = users.find(user => user.id === userId);
     setUsers(users.filter(user => user.id !== userId));
-    console.log('Deleted user ID:', userId);
+    
+    toast({
+      title: "User Deleted",
+      description: `${userToDelete?.name} (${userToDelete?.roll_no}) has been removed.`
+    });
   };
-
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    
+    let parsedValue: any = value;
+    if (name === 'year' && value) {
+      parsedValue = parseInt(value) as 1 | 2 | 3 | 4;
+    }
+    
+    setFormData({
+      ...formData,
+      [name]: parsedValue
+    });
+  };
+  
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">User Management</h1>
+    <div>
+      <h1 className="text-2xl font-bold mb-6">User Management</h1>
       
-      <div className="p-4 bg-white rounded-lg shadow dark:bg-gray-800">
-        <h2 className="text-xl font-semibold mb-4">Create New User</h2>
-        <form onSubmit={handleCreateUser} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Roll Number</label>
-              <input
-                type="text"
-                name="roll_no"
-                value={newUser.roll_no}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                required
-              />
-            </div>
+      <Tabs defaultValue="create" className="mb-8">
+        <TabsList>
+          <TabsTrigger value="create">Create User</TabsTrigger>
+          <TabsTrigger value="view">View Users</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="create">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+            <h2 className="text-lg font-semibold mb-4">Create New User</h2>
             
-            <div>
-              <label className="block text-sm font-medium mb-1">Name</label>
-              <input
-                type="text"
-                name="name"
-                value={newUser.name}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                required
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium mb-1">Email</label>
-              <input
-                type="email"
-                name="email"
-                value={newUser.email}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                required
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium mb-1">Phone</label>
-              <input
-                type="text"
-                name="phone"
-                value={newUser.phone}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                required
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium mb-1">Type</label>
-              <select
-                name="type"
-                value={newUser.type}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-                required
-              >
-                <option value="student">Student</option>
-                <option value="teacher">Teacher</option>
-              </select>
-            </div>
-            
-            {newUser.type === 'student' && (
-              <>
+            <form onSubmit={handleCreateUser}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Branch</label>
-                  <select
-                    name="branch"
-                    value={newUser.branch}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+                  <label htmlFor="roll_no" className="block text-sm font-medium mb-1">Roll Number</label>
+                  <input
+                    id="roll_no"
+                    name="roll_no"
+                    type="text"
                     required
-                  >
-                    <option value="CSE">CSE</option>
-                    <option value="ECE">ECE</option>
-                    <option value="EEE">EEE</option>
-                    <option value="MECH">MECH</option>
-                    <option value="CIVIL">CIVIL</option>
-                  </select>
+                    value={formData.roll_no}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border rounded"
+                  />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium mb-1">Year</label>
-                  <select
-                    name="year"
-                    value={newUser.year}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+                  <label htmlFor="name" className="block text-sm font-medium mb-1">Name</label>
+                  <input
+                    id="name"
+                    name="name"
+                    type="text"
                     required
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border rounded"
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium mb-1">Email</label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border rounded"
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="phone" className="block text-sm font-medium mb-1">Phone</label>
+                  <input
+                    id="phone"
+                    name="phone"
+                    type="text"
+                    required
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border rounded"
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="type" className="block text-sm font-medium mb-1">User Type</label>
+                  <select
+                    id="type"
+                    name="type"
+                    required
+                    value={formData.type}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border rounded"
                   >
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
+                    <option value="student">Student</option>
+                    <option value="teacher">Teacher</option>
+                    <option value="admin">Admin</option>
                   </select>
                 </div>
-              </>
-            )}
+                
+                {formData.type === 'student' && (
+                  <>
+                    <div>
+                      <label htmlFor="branch" className="block text-sm font-medium mb-1">Branch</label>
+                      <select
+                        id="branch"
+                        name="branch"
+                        required
+                        value={formData.branch}
+                        onChange={handleInputChange}
+                        className="w-full p-2 border rounded"
+                      >
+                        <option value="CSE">CSE</option>
+                        <option value="ECE">ECE</option>
+                        <option value="EEE">EEE</option>
+                        <option value="MECH">MECH</option>
+                        <option value="CIVIL">CIVIL</option>
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="year" className="block text-sm font-medium mb-1">Year</label>
+                      <select
+                        id="year"
+                        name="year"
+                        required
+                        value={formData.year}
+                        onChange={handleInputChange}
+                        className="w-full p-2 border rounded"
+                      >
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                      </select>
+                    </div>
+                  </>
+                )}
+              </div>
+              
+              <button 
+                type="submit" 
+                className="btn-primary flex items-center justify-center gap-2"
+              >
+                <Plus size={18} />
+                Create User
+              </button>
+            </form>
           </div>
-          
-          <button 
-            type="submit" 
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-          >
-            Create User
-          </button>
-        </form>
-      </div>
-      
-      <div className="bg-white rounded-lg shadow dark:bg-gray-800 p-4">
-        <Tabs defaultValue="all">
-          <TabsList className="mb-4">
-            <TabsTrigger value="all">All Users</TabsTrigger>
-            <TabsTrigger value="students">Students</TabsTrigger>
-            <TabsTrigger value="teachers">Teachers</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="all">
-            <UserTable users={users} onDelete={handleDeleteUser} />
-          </TabsContent>
-          
-          <TabsContent value="students">
-            <UserTable users={students} onDelete={handleDeleteUser} />
-          </TabsContent>
-          
-          <TabsContent value="teachers">
-            <UserTable users={teachers} onDelete={handleDeleteUser} />
-          </TabsContent>
-        </Tabs>
-      </div>
-    </div>
-  );
-};
-
-interface UserTableProps {
-  users: User[];
-  onDelete: (id: string) => void;
-}
-
-const UserTable: React.FC<UserTableProps> = ({ users, onDelete }) => {
-  return (
-    <div className="overflow-x-auto">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Roll No</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Phone</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Branch</TableHead>
-            <TableHead>Year</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {users.length > 0 ? (
-            users.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell>{user.roll_no}</TableCell>
-                <TableCell>{user.name}</TableCell>
-                <TableCell>{user.email}</TableCell>
-                <TableCell>{user.phone}</TableCell>
-                <TableCell className="capitalize">{user.type}</TableCell>
-                <TableCell>{user.branch || '-'}</TableCell>
-                <TableCell>{user.year || '-'}</TableCell>
-                <TableCell>
-                  <button
-                    onClick={() => onDelete(user.id)}
-                    className="text-red-500 hover:text-red-700 mr-2"
-                  >
-                    Delete
-                  </button>
-                </TableCell>
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={8} className="text-center py-4">
-                No users found
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+        </TabsContent>
+        
+        <TabsContent value="view">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+            <h2 className="text-lg font-semibold mb-4">User List</h2>
+            
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Roll No</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Branch</TableHead>
+                    <TableHead>Year</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {users.map(user => (
+                    <TableRow key={user.id}>
+                      <TableCell>{user.roll_no}</TableCell>
+                      <TableCell>{user.name}</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>{user.phone}</TableCell>
+                      <TableCell>
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium
+                          ${user.type === 'admin' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300' : 
+                            user.type === 'teacher' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' : 
+                            'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'}
+                        `}>
+                          {user.type.charAt(0).toUpperCase() + user.type.slice(1)}
+                        </span>
+                      </TableCell>
+                      <TableCell>{user.branch || 'N/A'}</TableCell>
+                      <TableCell>{user.year || 'N/A'}</TableCell>
+                      <TableCell>
+                        <button
+                          onClick={() => handleDeleteUser(user.id)}
+                          className="p-1 text-red-500 hover:text-red-700"
+                          aria-label="Delete user"
+                        >
+                          <X size={18} />
+                        </button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
