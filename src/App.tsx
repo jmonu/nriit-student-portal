@@ -17,6 +17,13 @@ import DashboardLayout from "./components/dashboard/DashboardLayout";
 import StudentDashboard from "./pages/student/StudentDashboard";
 import AttendancePage from "./pages/student/AttendancePage";
 
+// Admin Pages
+import UsersPage from "./pages/admin/UsersPage";
+import ClassesPage from "./pages/admin/ClassesPage";
+import ClassAssignmentPage from "./pages/admin/ClassAssignmentPage";
+import SlotsPage from "./pages/admin/SlotsPage";
+import SchedulesPage from "./pages/admin/SchedulesPage";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -56,10 +63,11 @@ const App = () => (
               {/* Admin Dashboard Routes */}
               <Route path="/admin-dashboard" element={<DashboardLayout />}>
                 <Route index element={<div>Admin Dashboard Home</div>} />
-                <Route path="users" element={<div>Admin Users Page</div>} />
-                <Route path="classes" element={<div>Admin Classes Page</div>} />
-                <Route path="slots" element={<div>Admin Slots Page</div>} />
-                <Route path="schedules" element={<div>Admin Schedules Page</div>} />
+                <Route path="users" element={<UsersPage />} />
+                <Route path="classes" element={<ClassesPage />} />
+                <Route path="class-assignments" element={<ClassAssignmentPage />} />
+                <Route path="slots" element={<SlotsPage />} />
+                <Route path="schedules" element={<SchedulesPage />} />
                 <Route path="attendance" element={<div>Admin Attendance Page</div>} />
                 <Route path="notices" element={<div>Admin Notices Page</div>} />
                 <Route path="events" element={<div>Admin Events Page</div>} />

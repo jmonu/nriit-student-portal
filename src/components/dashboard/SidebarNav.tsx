@@ -16,7 +16,8 @@ import {
   User,
   MessageSquare,
   LayoutGrid,
-  ClipboardList
+  ClipboardList,
+  BookOpen
 } from 'lucide-react';
 
 interface NavItemProps {
@@ -52,6 +53,7 @@ const SidebarNav: React.FC = () => {
           <NavItem to="/admin-dashboard" icon={<Home size={20} />} label="Home" />
           <NavItem to="/admin-dashboard/users" icon={<Users size={20} />} label="Users" />
           <NavItem to="/admin-dashboard/classes" icon={<LayoutGrid size={20} />} label="Classes" />
+          <NavItem to="/admin-dashboard/class-assignments" icon={<BookOpen size={20} />} label="Class Assignments" />
           <NavItem to="/admin-dashboard/slots" icon={<Clock size={20} />} label="Slots" />
           <NavItem to="/admin-dashboard/schedules" icon={<Layout size={20} />} label="Schedules" />
           <NavItem to="/admin-dashboard/attendance" icon={<ClipboardList size={20} />} label="Attendance" />
