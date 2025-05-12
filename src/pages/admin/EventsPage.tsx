@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from "@/components/ui/table";
@@ -6,7 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Event } from '@/lib/types';
 import { Plus, X, Calendar } from 'lucide-react';
 
-const EventsPage: React.FC = () => {
+// Change the export to a default export
+const EventsPage = () => {
   const { toast } = useToast();
   const [events, setEvents] = useState<Event[]>([
     {

@@ -34,8 +34,9 @@ import ClassesPage from "./pages/admin/ClassesPage";
 import ClassAssignmentPage from "./pages/admin/ClassAssignmentPage";
 import SlotsPage from "./pages/admin/SlotsPage";
 import SchedulesPage from "./pages/admin/SchedulesPage";
-import { NoticesPage as AdminNoticesPage } from "./pages/admin/NoticesPage";
-import { EventsPage as AdminEventsPage } from "./pages/admin/EventsPage";
+// Fix the imports for admin NoticesPage and EventsPage
+import AdminNoticesPage from "./pages/admin/NoticesPage";
+import AdminEventsPage from "./pages/admin/EventsPage";
 import AlertsPage from "./pages/admin/AlertsPage";
 import FacultyPage from "./pages/admin/FacultyPage";
 import CalendarPage from "./pages/admin/CalendarPage";
