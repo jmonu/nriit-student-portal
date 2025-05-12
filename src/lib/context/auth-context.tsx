@@ -1,6 +1,7 @@
 
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { User } from '../types';
+import dbService from '../database/db-service';
 
 interface AuthContextType {
   user: User | null;
@@ -16,6 +17,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Initialize database
+    dbService.initializeDatabase();
+    
     // Check if user is logged in on mount
     const storedUser = localStorage.getItem('nriit_user');
     if (storedUser) {
@@ -24,71 +28,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(false);
   }, []);
 
-  // Mock login function - in a real app this would call an API
   const login = async (roll_no: string, password: string) => {
-    // Mock API call - in real app this would call the login API endpoint
     setLoading(true);
     
     try {
-      // Mock authentication logic - would be replaced with actual API call
-      if (roll_no === 'ADMIN001' && password === 'admin123') {
-        const adminUser: User = {
-          id: '1',
-          roll_no: 'ADMIN001',
-          name: 'Admin User',
-          email: 'admin@nriit.edu',
-          phone: '9876543210',
-          type: 'admin',
-          photo: 'https://i.pravatar.cc/150?img=1'
-        };
-        setUser(adminUser);
-        localStorage.setItem('nriit_user', JSON.stringify(adminUser));
+      // Get all users from the database
+      const users = dbService.getUsers();
+      
+      // Find user with matching roll number
+      const matchedUser = users.find(u => u.roll_no === roll_no);
+      
+      // Check if it's an admin or teacher with specific credentials
+      if (roll_no === 'ADMIN001' && password === 'admin123' && matchedUser) {
+        setUser(matchedUser);
+        localStorage.setItem('nriit_user', JSON.stringify(matchedUser));
+        dbService.addAuditLog('User Login', `Admin user logged in: ${roll_no}`);
         return true;
-      } else if (roll_no === 'T001' && password === 'teacher123') {
-        const teacherUser: User = {
-          id: '2',
-          roll_no: 'T001',
-          name: 'Teacher User',
-          email: 'teacher@nriit.edu',
-          phone: '9876543211',
-          type: 'teacher',
-          photo: 'https://i.pravatar.cc/150?img=2'
-        };
-        setUser(teacherUser);
-        localStorage.setItem('nriit_user', JSON.stringify(teacherUser));
+      } else if (roll_no === 'T001' && password === 'teacher123' && matchedUser) {
+        setUser(matchedUser);
+        localStorage.setItem('nriit_user', JSON.stringify(matchedUser));
+        dbService.addAuditLog('User Login', `Teacher user logged in: ${roll_no}`);
         return true;
-      } else if (roll_no === 'S001' && password === 'monmad') {
-        const studentUser: User = {
-          id: '3',
-          roll_no: 'S001',
-          name: 'Student User',
-          email: 'student@nriit.edu',
-          phone: '9876543212',
-          type: 'student',
-          branch: 'CSE',
-          year: 2,
-          photo: 'https://i.pravatar.cc/150?img=3'
-        };
-        setUser(studentUser);
-        localStorage.setItem('nriit_user', JSON.stringify(studentUser));
+      } else if (matchedUser && matchedUser.type === 'student' && password === 'monmad') {
+        // All students use the common password
+        setUser(matchedUser);
+        localStorage.setItem('nriit_user', JSON.stringify(matchedUser));
+        dbService.addAuditLog('User Login', `Student user logged in: ${roll_no}`);
         return true;
       }
       
-      // Check for dynamically created students with password "monmad"
-      const storedUsersJSON = localStorage.getItem('nriit_users');
-      if (storedUsersJSON) {
-        const storedUsers = JSON.parse(storedUsersJSON);
-        const matchedUser = storedUsers.find((u: User) => 
-          u.roll_no === roll_no && u.type === 'student'
-        );
-        
-        if (matchedUser && password === 'monmad') {
-          setUser(matchedUser);
-          localStorage.setItem('nriit_user', JSON.stringify(matchedUser));
-          return true;
-        }
-      }
-      
+      dbService.addAuditLog('Login Failed', `Failed login attempt for user: ${roll_no}`);
       return false;
     } finally {
       setLoading(false);
@@ -96,6 +65,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
+    if (user) {
+      dbService.addAuditLog('User Logout', `User logged out: ${user.roll_no}`);
+    }
     setUser(null);
     localStorage.removeItem('nriit_user');
   };

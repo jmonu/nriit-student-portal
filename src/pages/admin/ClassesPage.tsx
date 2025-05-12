@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Table, 
   TableHeader, 
@@ -9,32 +9,21 @@ import {
   TableCell 
 } from '@/components/ui/table';
 import { Class } from '@/lib/types';
-
-// Mock class data - in a real app this would come from an API
-const mockClasses: Class[] = [
-  {
-    class_id: '1',
-    name: 'CSE-A',
-    semester: '1-1',
-  },
-  {
-    class_id: '2',
-    name: 'ECE-A',
-    semester: '1-1',
-  },
-  {
-    class_id: '3',
-    name: 'CSE-B',
-    semester: '2-1',
-  },
-];
+import dbService from '@/lib/database/db-service';
+import { useToast } from '@/hooks/use-toast';
 
 const ClassesPage: React.FC = () => {
-  const [classes, setClasses] = useState<Class[]>(mockClasses);
+  const [classes, setClasses] = useState<Class[]>([]);
   const [newClass, setNewClass] = useState({
     name: '',
     semester: '1-1',
   });
+  const { toast } = useToast();
+
+  // Load classes from database on component mount
+  useEffect(() => {
+    setClasses(dbService.getClasses());
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -47,13 +36,11 @@ const ClassesPage: React.FC = () => {
   const handleCreateClass = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // In a real app, this would make an API call
-    const newClassWithId: Class = {
-      class_id: `${Date.now()}`,
-      ...newClass
-    };
-
-    setClasses(prev => [...prev, newClassWithId]);
+    // Add new class to database
+    const createdClass = dbService.addClass(newClass);
+    
+    // Update local state
+    setClasses(dbService.getClasses());
     
     // Reset form
     setNewClass({
@@ -61,13 +48,23 @@ const ClassesPage: React.FC = () => {
       semester: '1-1',
     });
 
-    console.log('Created class:', newClassWithId);
+    toast({
+      title: "Class Created",
+      description: `Class "${createdClass.name}" has been created successfully.`
+    });
   };
 
   const handleDeleteClass = (classId: string) => {
-    // In a real app, this would make an API call
-    setClasses(classes.filter(c => c.class_id !== classId));
-    console.log('Deleted class ID:', classId);
+    // Delete class from database
+    dbService.deleteClass(classId);
+    
+    // Update local state
+    setClasses(dbService.getClasses());
+    
+    toast({
+      title: "Class Deleted",
+      description: "The class has been deleted successfully."
+    });
   };
 
   return (

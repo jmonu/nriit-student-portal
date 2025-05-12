@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Table, 
   TableHeader, 
@@ -9,32 +9,21 @@ import {
   TableCell 
 } from '@/components/ui/table';
 import { Slot } from '@/lib/types';
-
-// Mock slot data - in a real app this would come from an API
-const mockSlots: Slot[] = [
-  {
-    slot_id: '1',
-    name: 'Period 1',
-    time: '9:00–9:50 AM',
-  },
-  {
-    slot_id: '2',
-    name: 'Period 2',
-    time: '9:50–10:40 AM',
-  },
-  {
-    slot_id: '3',
-    name: 'Period 3',
-    time: '10:50–11:40 AM',
-  },
-];
+import dbService from '@/lib/database/db-service';
+import { useToast } from '@/hooks/use-toast';
 
 const SlotsPage: React.FC = () => {
-  const [slots, setSlots] = useState<Slot[]>(mockSlots);
+  const [slots, setSlots] = useState<Slot[]>([]);
   const [newSlot, setNewSlot] = useState({
     name: '',
     time: '',
   });
+  const { toast } = useToast();
+
+  // Load slots from database on component mount
+  useEffect(() => {
+    setSlots(dbService.getSlots());
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -47,13 +36,11 @@ const SlotsPage: React.FC = () => {
   const handleCreateSlot = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // In a real app, this would make an API call
-    const newSlotWithId: Slot = {
-      slot_id: `${Date.now()}`,
-      ...newSlot
-    };
-
-    setSlots(prev => [...prev, newSlotWithId]);
+    // Add new slot to database
+    const createdSlot = dbService.addSlot(newSlot);
+    
+    // Update local state
+    setSlots(dbService.getSlots());
     
     // Reset form
     setNewSlot({
@@ -61,13 +48,23 @@ const SlotsPage: React.FC = () => {
       time: '',
     });
 
-    console.log('Created slot:', newSlotWithId);
+    toast({
+      title: "Slot Created",
+      description: `Time slot "${createdSlot.name}" has been created successfully.`
+    });
   };
 
   const handleDeleteSlot = (slotId: string) => {
-    // In a real app, this would make an API call
-    setSlots(slots.filter(slot => slot.slot_id !== slotId));
-    console.log('Deleted slot ID:', slotId);
+    // Delete slot from database
+    dbService.deleteSlot(slotId);
+    
+    // Update local state
+    setSlots(dbService.getSlots());
+    
+    toast({
+      title: "Slot Deleted",
+      description: "The time slot has been deleted successfully."
+    });
   };
 
   return (

@@ -1,51 +1,39 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CalendarEntry } from '@/lib/types';
 import { Plus, X, Calendar } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import dbService from '@/lib/database/db-service';
 
 const CalendarPage: React.FC = () => {
   const { toast } = useToast();
-  const [calendarEntries, setCalendarEntries] = useState<CalendarEntry[]>([
-    {
-      id: '1',
-      entry: 'First Semester Begins',
-      date: '2025-07-01'
-    },
-    {
-      id: '2',
-      entry: 'Mid-term Examinations',
-      date: '2025-09-15'
-    },
-    {
-      id: '3',
-      entry: 'Diwali Holidays',
-      date: '2025-10-20'
-    },
-    {
-      id: '4',
-      entry: 'End Semester Examinations',
-      date: '2025-12-10'
-    }
-  ]);
+  const [calendarEntries, setCalendarEntries] = useState<CalendarEntry[]>([]);
 
   const [formData, setFormData] = useState({
     entry: '',
     date: new Date().toISOString().split('T')[0]
   });
 
+  // Load calendar entries from database on component mount
+  useEffect(() => {
+    setCalendarEntries(dbService.getCalendarEntries());
+  }, []);
+
   const handleCreateEntry = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const newEntry: CalendarEntry = {
-      id: Date.now().toString(),
+    // Add new entry to database
+    const newEntry = dbService.addCalendarEntry({
       entry: formData.entry,
       date: formData.date
-    };
+    });
     
-    setCalendarEntries([...calendarEntries, newEntry]);
+    // Update local state
+    setCalendarEntries(dbService.getCalendarEntries());
+    
+    // Reset form
     setFormData({ 
       entry: '', 
       date: new Date().toISOString().split('T')[0]
@@ -58,7 +46,11 @@ const CalendarPage: React.FC = () => {
   };
   
   const handleDeleteEntry = (entryId: string) => {
-    setCalendarEntries(calendarEntries.filter(entry => entry.id !== entryId));
+    // Delete entry from database
+    dbService.deleteCalendarEntry(entryId);
+    
+    // Update local state
+    setCalendarEntries(dbService.getCalendarEntries());
     
     toast({
       title: "Calendar Entry Removed",

@@ -1,9 +1,10 @@
 
 import React, { useState } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/lib/context/auth-context';
 import Layout from '@/components/layout/Layout';
 import { Eye, EyeOff } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const Login: React.FC = () => {
   const [rollNo, setRollNo] = useState('');
@@ -12,7 +13,7 @@ const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { user, login } = useAuth();
-  const navigate = useNavigate();
+  const { toast } = useToast();
 
   // If user is already logged in, redirect to their dashboard
   if (user) {
@@ -34,6 +35,11 @@ const Login: React.FC = () => {
       
       if (!success) {
         setError('Invalid credentials. Please try again.');
+      } else {
+        toast({
+          title: "Login Successful",
+          description: "Welcome back to the NRIIT portal."
+        });
       }
     } catch (err) {
       setError('An error occurred. Please try again.');
@@ -120,7 +126,7 @@ const Login: React.FC = () => {
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Forgot password? <a href="#" className="text-primary hover:underline">Click here</a> to reset.
+              Forgot password? <button className="text-primary hover:underline">Contact admin</button>
             </p>
           </div>
         </div>
