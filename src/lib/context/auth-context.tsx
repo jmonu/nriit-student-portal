@@ -2,7 +2,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { User } from '../types';
 import dbService from '../database/db-service';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface AuthContextType {
   user: User | null;
