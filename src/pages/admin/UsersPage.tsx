@@ -3,8 +3,10 @@ import React, { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
 import { User } from '@/lib/types';
-import { Check, X, Plus } from 'lucide-react';
+import { Check, X, Plus, Upload, User as UserIcon } from 'lucide-react';
 
 interface UserFormData {
   roll_no: string;
@@ -14,6 +16,7 @@ interface UserFormData {
   type: 'student' | 'teacher' | 'admin';
   branch?: 'CSE' | 'ECE' | 'EEE' | 'MECH' | 'CIVIL';
   year?: 1 | 2 | 3 | 4;
+  photo?: string;
 }
 
 const initialUserFormData: UserFormData = {
@@ -23,7 +26,8 @@ const initialUserFormData: UserFormData = {
   phone: '',
   type: 'student',
   branch: 'CSE',
-  year: 1
+  year: 1,
+  photo: ''
 };
 
 const UsersPage: React.FC = () => {
@@ -58,9 +62,20 @@ const UsersPage: React.FC = () => {
   ]);
 
   const [formData, setFormData] = useState<UserFormData>(initialUserFormData);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   
   const handleCreateUser = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validation for photo if user type is student
+    if (formData.type === 'student' && !formData.photo) {
+      toast({
+        title: "Photo Required",
+        description: "Please upload a photo for the student profile.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     // Generate a random ID
     const newUser: User = {
@@ -70,6 +85,7 @@ const UsersPage: React.FC = () => {
     
     setUsers([...users, newUser]);
     setFormData(initialUserFormData);
+    setPhotoPreview(null);
     
     // Log the user creation for demonstration
     console.log('Created user:', newUser);
@@ -103,6 +119,43 @@ const UsersPage: React.FC = () => {
       [name]: parsedValue
     });
   };
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Photo should be less than 2MB in size.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload an image file.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Create a URL for the image preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = reader.result as string;
+      setPhotoPreview(result);
+      setFormData({
+        ...formData,
+        photo: result
+      });
+    };
+    reader.readAsDataURL(file);
+  };
   
   return (
     <div>
@@ -119,56 +172,84 @@ const UsersPage: React.FC = () => {
             <h2 className="text-lg font-semibold mb-4">Create New User</h2>
             
             <form onSubmit={handleCreateUser}>
+              <div className="mb-6 flex flex-col items-center">
+                <div className="mb-2 relative">
+                  <Avatar className="w-24 h-24">
+                    {photoPreview ? (
+                      <AvatarImage src={photoPreview} alt="Profile preview" />
+                    ) : (
+                      <AvatarFallback className="bg-gray-200 dark:bg-gray-700">
+                        <UserIcon className="w-12 h-12 text-gray-400" />
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                  <label 
+                    htmlFor="photo-upload" 
+                    className="absolute bottom-0 right-0 bg-primary text-white rounded-full p-2 cursor-pointer shadow-md hover:bg-primary/90 transition-colors"
+                    title="Upload photo"
+                  >
+                    <Upload size={16} />
+                  </label>
+                  <Input
+                    id="photo-upload"
+                    name="photo"
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoUpload}
+                    className="hidden"
+                  />
+                </div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {formData.type === 'student' ? 'Profile photo (required)' : 'Profile photo (optional)'}
+                </p>
+              </div>
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                   <label htmlFor="roll_no" className="block text-sm font-medium mb-1">Roll Number</label>
-                  <input
+                  <Input
                     id="roll_no"
                     name="roll_no"
                     type="text"
                     required
                     value={formData.roll_no}
                     onChange={handleInputChange}
-                    className="w-full p-2 border rounded"
                   />
                 </div>
                 
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium mb-1">Name</label>
-                  <input
+                  <Input
                     id="name"
                     name="name"
                     type="text"
                     required
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="w-full p-2 border rounded"
                   />
                 </div>
                 
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium mb-1">Email</label>
-                  <input
+                  <Input
                     id="email"
                     name="email"
                     type="email"
                     required
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="w-full p-2 border rounded"
                   />
                 </div>
                 
                 <div>
                   <label htmlFor="phone" className="block text-sm font-medium mb-1">Phone</label>
-                  <input
+                  <Input
                     id="phone"
                     name="phone"
                     type="text"
                     required
                     value={formData.phone}
                     onChange={handleInputChange}
-                    className="w-full p-2 border rounded"
                   />
                 </div>
                 
@@ -247,6 +328,7 @@ const UsersPage: React.FC = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Photo</TableHead>
                     <TableHead>Roll No</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
@@ -260,6 +342,17 @@ const UsersPage: React.FC = () => {
                 <TableBody>
                   {users.map(user => (
                     <TableRow key={user.id}>
+                      <TableCell>
+                        <Avatar className="w-10 h-10">
+                          {user.photo ? (
+                            <AvatarImage src={user.photo} alt={user.name} />
+                          ) : (
+                            <AvatarFallback>
+                              {user.name.charAt(0)}
+                            </AvatarFallback>
+                          )}
+                        </Avatar>
+                      </TableCell>
                       <TableCell>{user.roll_no}</TableCell>
                       <TableCell>{user.name}</TableCell>
                       <TableCell>{user.email}</TableCell>

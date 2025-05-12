@@ -12,8 +12,8 @@ const StudentDashboard: React.FC = () => {
 
   // Mock data
   const notices: Notice[] = [
-    { id: '1', text: 'Mid-term examination schedule has been updated', date: '2025-03-10' },
-    { id: '2', text: 'Library timings extended during examination period', date: '2025-03-09' }
+    { id: '1', title: 'Mid-term examination schedule has been updated', content: 'The schedule can be found on the notice board.', date: '2025-03-10' },
+    { id: '2', title: 'Library timings extended during examination period', content: 'Library will be open from 8 AM to 10 PM', date: '2025-03-09' }
   ];
 
   const events: Event[] = [
@@ -114,7 +114,8 @@ const StudentDashboard: React.FC = () => {
                       year: 'numeric'
                     })}
                   </div>
-                  <p className="text-gray-700 dark:text-gray-300">{notice.text}</p>
+                  <p className="font-medium text-gray-800 dark:text-gray-200 mb-1">{notice.title}</p>
+                  <p className="text-gray-700 dark:text-gray-300">{notice.content}</p>
                 </div>
               ))
             ) : (
