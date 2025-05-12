@@ -34,12 +34,14 @@ import ClassesPage from "./pages/admin/ClassesPage";
 import ClassAssignmentPage from "./pages/admin/ClassAssignmentPage";
 import SlotsPage from "./pages/admin/SlotsPage";
 import SchedulesPage from "./pages/admin/SchedulesPage";
-// Fix the imports for admin NoticesPage and EventsPage
 import AdminNoticesPage from "./pages/admin/NoticesPage";
 import AdminEventsPage from "./pages/admin/EventsPage";
 import AlertsPage from "./pages/admin/AlertsPage";
 import FacultyPage from "./pages/admin/FacultyPage";
 import CalendarPage from "./pages/admin/CalendarPage";
+import ComplaintsPage from "./pages/admin/ComplaintsPage";
+import SettingsPage from "./pages/admin/SettingsPage";
+import AuditLogPage from "./pages/admin/AuditLogPage";
 
 const queryClient = new QueryClient();
 
@@ -79,10 +81,10 @@ const App = () => (
                 <Route path="alerts" element={<div>Teacher Alerts Page</div>} />
                 <Route path="faculty" element={<div>Teacher Faculty Page</div>} />
                 <Route path="calendar" element={<div>Teacher Calendar Page</div>} />
-                <Route path="complaints" element={<div>Teacher Complaints Page</div>} />
+                <Route path="complaints" element={<ComplaintsPage />} />
                 <Route path="students" element={<div>Teacher Students Page</div>} />
-                <Route path="settings" element={<div>Teacher Settings Page</div>} />
-                <Route path="audit-log" element={<div>Teacher Audit Log Page</div>} />
+                <Route path="settings" element={<SettingsPage />} />
+                <Route path="audit-log" element={<AuditLogPage />} />
               </Route>
 
               {/* Admin Dashboard Routes */}
@@ -99,9 +101,9 @@ const App = () => (
                 <Route path="alerts" element={<AlertsPage />} />
                 <Route path="faculty" element={<FacultyPage />} />
                 <Route path="calendar" element={<CalendarPage />} />
-                <Route path="complaints" element={<div>Admin Complaints Page</div>} />
-                <Route path="settings" element={<div>Admin Settings Page</div>} />
-                <Route path="audit-log" element={<div>Admin Audit Log Page</div>} />
+                <Route path="complaints" element={<ComplaintsPage />} />
+                <Route path="settings" element={<SettingsPage />} />
+                <Route path="audit-log" element={<AuditLogPage />} />
               </Route>
 
               {/* 404 Route */}
