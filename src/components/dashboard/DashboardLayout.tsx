@@ -98,7 +98,8 @@ const DashboardLayout: React.FC = () => {
       </div>
       
       {/* Add some custom styling to ensure proper dashboard layout */}
-      <style jsx>{`
+      <style>
+        {`
         .dashboard-layout {
           display: grid;
           grid-template-columns: 280px 1fr;
@@ -158,7 +159,8 @@ const DashboardLayout: React.FC = () => {
             padding-right: 1rem;
           }
         }
-      `}</style>
+        `}
+      </style>
     </div>
   );
 };
