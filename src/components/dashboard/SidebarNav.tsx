@@ -96,7 +96,7 @@ const SidebarNav: React.FC = () => {
       {/* Logout Button */}
       <button 
         onClick={logout}
-        className="dashboard-menu-item mt-auto text-white/80 hover:text-white"
+        className="dashboard-menu-item mt-auto bg-blue-600 hover:bg-blue-700 text-white"
       >
         <LogOut size={20} />
         <span>Logout</span>

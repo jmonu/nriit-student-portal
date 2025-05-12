@@ -11,6 +11,14 @@ import { ThemeProvider } from "@/lib/context/theme-context";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
+import About from "./pages/About";
+import Courses from "./pages/Courses";
+import FacultyList from "./pages/FacultyList";
+import Placements from "./pages/Placements";
+import NoticesPage from "./pages/NoticesPage";
+import EventsPage from "./pages/EventsPage";
+import CalendarListPage from "./pages/CalendarListPage";
+import Contact from "./pages/Contact";
 
 // Dashboards
 import DashboardLayout from "./components/dashboard/DashboardLayout";
@@ -26,8 +34,8 @@ import ClassesPage from "./pages/admin/ClassesPage";
 import ClassAssignmentPage from "./pages/admin/ClassAssignmentPage";
 import SlotsPage from "./pages/admin/SlotsPage";
 import SchedulesPage from "./pages/admin/SchedulesPage";
-import NoticesPage from "./pages/admin/NoticesPage";
-import EventsPage from "./pages/admin/EventsPage";
+import NoticesPage as AdminNoticesPage from "./pages/admin/NoticesPage";
+import EventsPage as AdminEventsPage from "./pages/admin/EventsPage";
 import AlertsPage from "./pages/admin/AlertsPage";
 import FacultyPage from "./pages/admin/FacultyPage";
 import CalendarPage from "./pages/admin/CalendarPage";
@@ -37,15 +45,23 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
+      <BrowserRouter>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/courses" element={<Courses />} />
+              <Route path="/faculty" element={<FacultyList />} />
+              <Route path="/placements" element={<Placements />} />
+              <Route path="/notices" element={<NoticesPage />} />
+              <Route path="/events" element={<EventsPage />} />
+              <Route path="/calendar" element={<CalendarListPage />} />
+              <Route path="/contact" element={<Contact />} />
 
               {/* Student Dashboard Routes */}
               <Route path="/student-dashboard" element={<DashboardLayout />}>
@@ -77,8 +93,8 @@ const App = () => (
                 <Route path="slots" element={<SlotsPage />} />
                 <Route path="schedules" element={<SchedulesPage />} />
                 <Route path="attendance" element={<div>Admin Attendance Page</div>} />
-                <Route path="notices" element={<NoticesPage />} />
-                <Route path="events" element={<EventsPage />} />
+                <Route path="notices" element={<AdminNoticesPage />} />
+                <Route path="events" element={<AdminEventsPage />} />
                 <Route path="alerts" element={<AlertsPage />} />
                 <Route path="faculty" element={<FacultyPage />} />
                 <Route path="calendar" element={<CalendarPage />} />
@@ -90,9 +106,9 @@ const App = () => (
               {/* 404 Route */}
               <Route path="*" element={<NotFound />} />
             </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </AuthProvider>
+          </TooltipProvider>
+        </AuthProvider>
+      </BrowserRouter>
     </ThemeProvider>
   </QueryClientProvider>
 );
