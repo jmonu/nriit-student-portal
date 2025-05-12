@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   roll_no: string;
@@ -42,9 +41,11 @@ export interface Attendance {
 
 export interface Notice {
   id: string;
-  text: string;
-  image?: string;
+  title: string;
+  content: string;
+  category?: 'general' | 'academic' | 'exam' | 'event';
   date: string;
+  image?: string;
 }
 
 export interface Event {

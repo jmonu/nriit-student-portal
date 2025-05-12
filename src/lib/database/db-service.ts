@@ -1,4 +1,3 @@
-
 import { User, Class, Slot, Schedule, Attendance, Notice, Event, Alert, Faculty, CalendarEntry, Complaint, AuditLog, Course } from '../types';
 
 // Initialize database with default values if it doesn't exist
@@ -115,7 +114,9 @@ const initializeDatabase = () => {
   const notices: Notice[] = [
     {
       id: '1',
-      text: 'Mid-semester exams starting from 15th May',
+      title: 'Mid-semester exams starting from 15th May',
+      content: 'Please prepare for the upcoming examinations. The schedule is available on the notice board.',
+      category: 'exam',
       date: '2025-05-05',
     }
   ];
