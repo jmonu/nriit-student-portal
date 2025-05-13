@@ -40,7 +40,7 @@ const DashboardLayout: React.FC = () => {
   return (
     <div className="dashboard-layout bg-gray-50 dark:bg-gray-900 min-h-screen">
       {/* Sidebar (desktop) */}
-      <aside className={`dashboard-sidebar ${sidebarOpen ? 'block' : 'hidden md:block'} bg-gray-800 dark:bg-gray-800 text-white`}>
+      <aside className={`dashboard-sidebar ${sidebarOpen ? 'block' : 'hidden md:block'} bg-blue-900 dark:bg-blue-900 text-white`}>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-bold">{userTypeTitle} Panel</h2>
           <button

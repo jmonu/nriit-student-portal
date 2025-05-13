@@ -1,33 +1,30 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/context/auth-context';
 import { FileText, Bell, Calendar } from 'lucide-react';
 import type { Notice, Event, Alert } from '@/lib/types';
+import dbService from '@/lib/database/db-service';
+import { useToast } from '@/components/ui/use-toast';
 
 const StudentDashboard: React.FC = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [notices, setNotices] = useState<Notice[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
 
-  // Mock data
-  const notices: Notice[] = [
-    { id: '1', title: 'Mid-term examination schedule has been updated', content: 'The schedule can be found on the notice board.', date: '2025-03-10' },
-    { id: '2', title: 'Library timings extended during examination period', content: 'Library will be open from 8 AM to 10 PM', date: '2025-03-09' }
-  ];
-
-  const events: Event[] = [
-    { 
-      id: '1', 
-      text: 'Technical Fest - TechnoVision 2025', 
-      date: '2025-04-15', 
-      image: 'https://i.ibb.co/KcsH2ztS/c50fd3be6d8a.jpg'
+  // Load data on component mount
+  useEffect(() => {
+    if (user) {
+      // Load notices, events and alerts from database
+      setNotices(dbService.getNotices());
+      setEvents(dbService.getEvents());
+      setAlerts(dbService.getAlerts());
     }
-  ];
-
-  const alerts: Alert[] = [
-    { id: '1', text: 'Fee payment deadline extended to March 25, 2025', date: '2025-03-05' }
-  ];
+  }, [user]);
 
   if (!user || user.type !== 'student') {
     return <div className="p-4">Unauthorized access.</div>;
@@ -37,16 +34,33 @@ const StudentDashboard: React.FC = () => {
     e.preventDefault();
     setSubmitting(true);
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Submit complaint to database
+      const newComplaint = dbService.addComplaint({
+        student_id: user.id,
+        subject: subject,
+        message: message,
+        date: new Date().toISOString().split('T')[0]
+      });
+      
       // Reset form
       setSubject('');
       setMessage('');
-      setSubmitting(false);
       
-      // Show success message (would use a real toast notification in production)
-      alert('Complaint submitted successfully!');
-    }, 1000);
+      // Show success message
+      toast({
+        title: "Complaint Submitted",
+        description: "Your complaint has been submitted successfully."
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit complaint. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (

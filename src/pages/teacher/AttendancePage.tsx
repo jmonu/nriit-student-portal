@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Calendar, Download, Check, X, CheckSquare, Filter, UserCheck, UserX } from 'lucide-react';
 import { Attendance, User } from '@/lib/types';
+import dbService from '@/lib/database/db-service';
 
 interface AttendanceFormData {
   classId: string;
@@ -21,54 +22,23 @@ interface AttendanceFormData {
 const TeacherAttendancePage: React.FC = () => {
   const { toast } = useToast();
   
-  // Mock class and slot data
-  const classes = [
-    { id: "1", name: "CSE-A" },
-    { id: "2", name: "ECE-A" }
-  ];
+  // Load classes and slots from database
+  const [classes, setClasses] = useState<{ id: string; name: string; }[]>([]);
+  const [slots, setSlots] = useState<{ id: string; name: string; }[]>([]);
+  const [students, setStudents] = useState<User[]>([]);
+  const [attendanceRecords, setAttendanceRecords] = useState<Attendance[]>([]);
   
-  const slots = [
-    { id: "1", name: "Period 1" },
-    { id: "2", name: "Period 2" },
-    { id: "3", name: "Period 3" }
-  ];
-  
-  // Mock student data
-  const studentData: User[] = [
-    { id: "1", type: "student", roll_no: "S001", name: "Student One", email: "s1@example.com", phone: "1234567890", branch: "CSE", year: 2 },
-    { id: "2", type: "student", roll_no: "S002", name: "Student Two", email: "s2@example.com", phone: "1234567891", branch: "CSE", year: 2 },
-    { id: "3", type: "student", roll_no: "S003", name: "Student Three", email: "s3@example.com", phone: "1234567892", branch: "CSE", year: 2 },
-    { id: "4", type: "student", roll_no: "S004", name: "Student Four", email: "s4@example.com", phone: "1234567893", branch: "ECE", year: 2 },
-    { id: "5", type: "student", roll_no: "S005", name: "Student Five", email: "s5@example.com", phone: "1234567894", branch: "ECE", year: 2 },
-  ];
-  
-  // Mock attendance data
-  const [attendanceRecords, setAttendanceRecords] = useState<Attendance[]>([
-    { 
-      attendance_id: "1", 
-      student_id: "1", 
-      class_id: "1", 
-      slot_id: "1", 
-      date: "2025-05-10", 
-      status: "present" 
-    },
-    { 
-      attendance_id: "2", 
-      student_id: "2", 
-      class_id: "1", 
-      slot_id: "1", 
-      date: "2025-05-10", 
-      status: "present" 
-    },
-    { 
-      attendance_id: "3", 
-      student_id: "3", 
-      class_id: "1", 
-      slot_id: "1", 
-      date: "2025-05-10", 
-      status: "absent" 
-    },
-  ]);
+  useEffect(() => {
+    // Load data from database
+    setClasses(dbService.getClasses().map(c => ({ id: c.class_id, name: c.name })));
+    setSlots(dbService.getSlots().map(s => ({ id: s.slot_id, name: s.name })));
+    
+    const allUsers = dbService.getUsers();
+    const studentUsers = allUsers.filter(user => user.type === 'student');
+    setStudents(studentUsers);
+    
+    setAttendanceRecords(dbService.getAttendance());
+  }, []);
   
   const [formData, setFormData] = useState<AttendanceFormData>({
     classId: "",
@@ -87,7 +57,7 @@ const TeacherAttendancePage: React.FC = () => {
   useEffect(() => {
     if (formData.classId) {
       // In a real app, this would be filtered based on class assignment
-      const filteredStudents = studentData.map(student => ({
+      const filteredStudents = students.map(student => ({
         id: student.id,
         name: student.name,
         roll_no: student.roll_no,
@@ -99,7 +69,7 @@ const TeacherAttendancePage: React.FC = () => {
         students: filteredStudents
       }));
     }
-  }, [formData.classId, formData.slotId]);
+  }, [formData.classId, formData.slotId, students]);
   
   const handleSelectAllToggle = () => {
     const newSelectAll = !selectAll;
@@ -148,34 +118,64 @@ const TeacherAttendancePage: React.FC = () => {
   const handleSubmitAttendance = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Create new attendance records
-    const newRecords = formData.students.map(student => ({
-      attendance_id: Date.now().toString() + student.id,
-      student_id: student.id,
-      class_id: formData.classId,
-      slot_id: formData.slotId,
-      date: formData.date,
-      status: student.isPresent ? "present" as const : "absent" as const
-    }));
-    
-    setAttendanceRecords([...attendanceRecords, ...newRecords]);
-    
-    // Count present and absent
-    const presentCount = formData.students.filter(s => s.isPresent).length;
-    const absentCount = formData.students.length - presentCount;
-    
-    toast({
-      title: "Attendance Recorded",
-      description: `Present: ${presentCount}, Absent: ${absentCount}`
-    });
-    
-    // Reset form
-    setFormData({
-      classId: "",
-      slotId: "",
-      date: new Date().toISOString().split('T')[0],
-      students: []
-    });
+    try {
+      // Save attendance records to database
+      const newRecords: Attendance[] = [];
+      
+      formData.students.forEach(student => {
+        // Check if attendance record already exists
+        const existingRecord = attendanceRecords.find(record => 
+          record.student_id === student.id && 
+          record.class_id === formData.classId &&
+          record.slot_id === formData.slotId &&
+          record.date === formData.date
+        );
+        
+        if (existingRecord) {
+          // Update existing record
+          dbService.updateAttendance(existingRecord.attendance_id, {
+            status: student.isPresent ? 'present' : 'absent'
+          });
+        } else {
+          // Add new record
+          const newRecord = dbService.addAttendance({
+            student_id: student.id,
+            class_id: formData.classId,
+            slot_id: formData.slotId,
+            date: formData.date,
+            status: student.isPresent ? 'present' : 'absent'
+          });
+          
+          newRecords.push(newRecord);
+        }
+      });
+      
+      // Update local state
+      setAttendanceRecords([...attendanceRecords, ...newRecords]);
+      
+      // Count present and absent
+      const presentCount = formData.students.filter(s => s.isPresent).length;
+      const absentCount = formData.students.length - presentCount;
+      
+      toast({
+        title: "Attendance Recorded",
+        description: `Present: ${presentCount}, Absent: ${absentCount}`
+      });
+      
+      // Reset form
+      setFormData({
+        classId: "",
+        slotId: "",
+        date: new Date().toISOString().split('T')[0],
+        students: []
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to record attendance. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
   
   const getFilteredAttendance = () => {
@@ -186,7 +186,7 @@ const TeacherAttendancePage: React.FC = () => {
   };
   
   const getStudentById = (id: string) => {
-    return studentData.find(student => student.id === id);
+    return students.find(student => student.id === id);
   };
   
   const getClassName = (id: string) => {

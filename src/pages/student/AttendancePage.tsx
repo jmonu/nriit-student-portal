@@ -3,6 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { Calendar, Download, ChevronLeft, ChevronRight, BarChart } from 'lucide-react';
 import { Bar } from 'recharts';
 import { BarChart as ReBarChart } from 'recharts';
+import dbService from '@/lib/database/db-service';
+import { useAuth } from '@/lib/context/auth-context';
+import { Attendance } from '@/lib/types';
 
 interface AttendanceRecord {
   id: string;
@@ -13,20 +16,31 @@ interface AttendanceRecord {
   status: 'present' | 'absent';
 }
 
-const dummyAttendanceRecords: AttendanceRecord[] = [
-  { id: '1', date: '2025-03-01', section: 'CSE-A', subject: 'Data Structures', slot: 'Period 1', status: 'present' },
-  { id: '2', date: '2025-03-01', section: 'CSE-A', subject: 'Computer Networks', slot: 'Period 2', status: 'present' },
-  { id: '3', date: '2025-03-01', section: 'CSE-A', subject: 'Operating Systems', slot: 'Period 3', status: 'absent' },
-  { id: '4', date: '2025-03-02', section: 'CSE-A', subject: 'Data Structures', slot: 'Period 1', status: 'present' },
-  { id: '5', date: '2025-03-02', section: 'CSE-A', subject: 'Computer Networks', slot: 'Period 2', status: 'present' },
-  { id: '6', date: '2025-03-02', section: 'CSE-A', subject: 'Operating Systems', slot: 'Period 3', status: 'present' },
-  { id: '7', date: '2025-03-03', section: 'CSE-A', subject: 'Data Structures', slot: 'Period 1', status: 'absent' },
-  { id: '8', date: '2025-03-03', section: 'CSE-A', subject: 'Computer Networks', slot: 'Period 2', status: 'present' },
-  { id: '9', date: '2025-03-03', section: 'CSE-A', subject: 'Operating Systems', slot: 'Period 3', status: 'present' },
-  { id: '10', date: '2025-03-04', section: 'CSE-A', subject: 'Data Structures', slot: 'Period 1', status: 'present' },
-];
+// Convert database attendance records to frontend format
+const mapAttendanceRecords = (records: Attendance[]): AttendanceRecord[] => {
+  return records.map(record => {
+    const slot = dbService.getSlotById(record.slot_id);
+    const classInfo = dbService.getClassById(record.class_id);
+    
+    // Get schedule to determine subject
+    const schedules = dbService.getSchedules().filter(
+      s => s.class_id === record.class_id && s.slot_id === record.slot_id
+    );
+    const subject = schedules.length > 0 ? schedules[0].subject : 'Unknown';
+    
+    return {
+      id: record.attendance_id,
+      date: record.date,
+      section: classInfo ? classInfo.name : 'Unknown',
+      subject: subject,
+      slot: slot ? slot.name : 'Unknown',
+      status: record.status
+    };
+  });
+};
 
 const AttendancePage: React.FC = () => {
+  const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState<string>(
     new Date().toISOString().split('T')[0]
   );
@@ -38,22 +52,31 @@ const AttendancePage: React.FC = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   
   useEffect(() => {
-    // In a real app, this would be an API call
-    // Simulate loading data
-    setAllAttendanceData(dummyAttendanceRecords);
+    if (!user) return;
     
-    // Calculate attendance percentage
-    const totalClasses = dummyAttendanceRecords.length;
-    const presentClasses = dummyAttendanceRecords.filter(record => record.status === 'present').length;
-    const percentage = (presentClasses / totalClasses) * 100;
-    setAttendancePercentage(Math.round(percentage));
+    // Load attendance data from database
+    const loadAttendanceData = () => {
+      const allRecords = dbService.getAttendance();
+      const userRecords = allRecords.filter(record => record.student_id === user.id);
+      
+      const mappedRecords = mapAttendanceRecords(userRecords);
+      setAllAttendanceData(mappedRecords);
+      
+      // Calculate attendance percentage
+      const totalClasses = mappedRecords.length;
+      const presentClasses = mappedRecords.filter(record => record.status === 'present').length;
+      const percentage = totalClasses > 0 ? (presentClasses / totalClasses) * 100 : 0;
+      setAttendancePercentage(Math.round(percentage));
+      
+      // Filter for selected date
+      filterAttendanceByDate(selectedDate, mappedRecords);
+    };
     
-    // Filter for selected date
-    filterAttendanceByDate(selectedDate);
-  }, []);
+    loadAttendanceData();
+  }, [user]);
   
-  const filterAttendanceByDate = (date: string) => {
-    const filtered = allAttendanceData.filter(record => record.date === date);
+  const filterAttendanceByDate = (date: string, records = allAttendanceData) => {
+    const filtered = records.filter(record => record.date === date);
     setAttendanceData(filtered);
   };
   
